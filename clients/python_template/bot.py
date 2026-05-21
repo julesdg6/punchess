@@ -6,7 +6,7 @@ from typing import Dict, Any
 import requests
 import chess
 
-BASE_URL = os.getenv("PUNCHESS_URL", "http://localhost:8080")
+BASE_URL = os.getenv("PUNCHESS_URL", "http://localhost:2700")
 BOT_NAME = os.getenv("PUNCHESS_BOT_NAME", "random-bot")
 
 
