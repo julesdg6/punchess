@@ -65,7 +65,7 @@ def request_llm_move(game_state: Dict[str, Any], client: httpx.Client) -> str:
     payload = response.json()
     text = payload.get("response")
     if not isinstance(text, str):
-        raise ValueError(f"unexpected Ollama response payload: {payload!r}")
+        raise ValueError(f"expected string response from Ollama, got {type(text).__name__}: {payload!r}")
     return extract_move(text, moves)
 
 
