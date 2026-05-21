@@ -7,7 +7,8 @@ import requests
 
 BASE_URL = os.getenv("PUNCHESS_URL", "http://localhost:2700")
 BOT_NAME = os.getenv("PUNCHESS_BOT_NAME", "bootchess-bot")
-# BootChess uses compact capture weights rather than conventional engine scores.
+# BootChess uses compact capture weights (4/8/12/16/24) from the original article
+# rather than conventional engine scores or centipawn values.
 PIECE_VALUES = {
     chess.PAWN: 4,
     chess.KNIGHT: 8,

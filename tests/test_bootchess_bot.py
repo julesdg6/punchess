@@ -34,5 +34,11 @@ def test_capture_value_handles_en_passant():
     assert capture_value(board, chess.Move.from_uci("e5d6")) == 4
 
 
+def test_capture_value_handles_standard_capture():
+    board = chess.Board("4k3/8/8/3q4/4P3/8/8/4K3 w - - 0 1")
+
+    assert capture_value(board, chess.Move.from_uci("e4d5")) == 24
+
+
 def test_taxi_distance_counts_file_and_rank_steps():
     assert taxi_distance(chess.E2, chess.E8) == 6
