@@ -37,4 +37,5 @@ Reports are generated to `/reports/<game_id>/report.json`, `/report.md`, and `/g
 ## Python clients
 
 - `clients/python_template/` contains a random legal-move bot starter.
+- `clients/python_bootchess/` contains a very simple BootChess-inspired client that prefers captures and otherwise moves closer to the opposing king.
 - `clients/python_minimax/` contains a simple minimax-based bot. The referenced `apostolisv/chess-ai` repository did not expose an explicit license in its repository root files or README, so this bot is an original implementation instead of a direct code copy.
