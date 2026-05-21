@@ -58,3 +58,4 @@ Example:
 ```bash
 PUNCHESS_OLLAMA_MODEL=llama3.2 python clients/python_ollama/bot.py
 ```
+- `clients/python_minimax/` contains a simple minimax-based bot. The referenced `apostolisv/chess-ai` repository did not expose an explicit license in its repository root files or README, so this bot is an original implementation instead of a direct code copy.
