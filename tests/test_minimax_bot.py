@@ -28,3 +28,9 @@ def test_search_depth_rejects_invalid_env(monkeypatch: pytest.MonkeyPatch):
 
     with pytest.raises(ValueError, match="PUNCHESS_MINIMAX_DEPTH must be an integer"):
         search_depth()
+
+
+def test_search_depth_clamps_non_positive_values(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("PUNCHESS_MINIMAX_DEPTH", "0")
+
+    assert search_depth() == 1
