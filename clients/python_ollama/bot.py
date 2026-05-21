@@ -14,7 +14,7 @@ POLL_INTERVAL_SECONDS = float(os.getenv("PUNCHESS_POLL_INTERVAL_SECONDS", "0.5")
 HTTP_TIMEOUT_SECONDS = float(os.getenv("PUNCHESS_HTTP_TIMEOUT_SECONDS", "30"))
 OLLAMA_TEMPERATURE = float(os.getenv("PUNCHESS_OLLAMA_TEMPERATURE", "0"))
 
-UCI_MOVE_RE = re.compile(r"\b([a-h][1-8][a-h][1-8][qrbn]?)\b", re.IGNORECASE)
+UCI_MOVE_RE = re.compile(r"\b([a-h][1-8][a-h][1-8][qrbn]?)\b")
 
 
 def legal_moves(game_state: Dict[str, Any]) -> List[str]:

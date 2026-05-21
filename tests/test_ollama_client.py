@@ -1,3 +1,5 @@
+import pytest
+
 from clients.python_ollama import bot
 
 
@@ -40,9 +42,5 @@ def test_extract_move_finds_legal_move_inside_text():
 
 
 def test_extract_move_raises_when_no_legal_move_is_present():
-    try:
+    with pytest.raises(ValueError, match="no legal UCI move found"):
         bot.extract_move("I would castle here.", ["e2e4", "d2d4"])
-    except ValueError as exc:
-        assert "no legal UCI move found" in str(exc)
-    else:
-        raise AssertionError("expected ValueError")
