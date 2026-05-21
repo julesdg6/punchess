@@ -38,3 +38,9 @@ Reports are generated to `/reports/<game_id>/report.json`, `/report.md`, and `/g
 
 - `clients/python_template/` contains a random legal-move bot starter.
 - `clients/python_minimax/` contains a simple minimax-based bot. The referenced `apostolisv/chess-ai` repository did not expose an explicit license in its repository root files or README, so this bot is an original implementation instead of a direct code copy.
+
+## Unraid template
+
+- Template file: `deploy/unraid/punchess.xml`
+- Includes a chess icon and WebUI mapping (`http://[IP]:[PORT:2700]/`) for Unraid's UI launch button.
+
