@@ -36,7 +36,7 @@ def choose_move(game_state: Dict[str, Any]) -> str:
     board = chess.Board(game_state["fen"])
     opponent_king = board.king(not board.turn)
     if opponent_king is None:
-        raise ValueError("opponent king not found")
+        raise ValueError("Opponent king not found")
 
     best_move = None
     best_score = None
@@ -47,7 +47,7 @@ def choose_move(game_state: Dict[str, Any]) -> str:
             best_move = move
 
     if best_move is None:
-        raise ValueError("no legal moves available")
+        raise ValueError("No legal moves available")
     return best_move.uci()
 
 
