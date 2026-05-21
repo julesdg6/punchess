@@ -34,6 +34,7 @@ Web UI: `http://localhost:2700`
 
 Reports are generated to `/reports/<game_id>/report.json`, `/report.md`, and `/game.pgn`.
 
-## Python bot template
+## Python clients
 
-See `clients/python_template/` for a random legal-move bot starter.
+- `clients/python_template/` contains a random legal-move bot starter.
+- `clients/python_minimax/` contains a simple minimax-based bot. The referenced `apostolisv/chess-ai` repository did not expose an explicit license in its repository root files or README, so this bot is an original implementation instead of a direct code copy.
