@@ -407,7 +407,10 @@ async def resign(game_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
 
 @app.get("/api/games/{game_id}/report")
 async def game_report(game_id: str):
-    report_path = REPORT_DIR / game_id / "report.json"
+    game = games.get(game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="game not found")
+    report_path = REPORT_DIR / game.id / "report.json"
     if not report_path.exists():
         raise HTTPException(status_code=404, detail="report not found")
     return JSONResponse(json.loads(report_path.read_text(encoding="utf-8")))
