@@ -7,6 +7,7 @@ import requests
 
 BASE_URL = os.getenv("PUNCHESS_URL", "http://localhost:2700")
 BOT_NAME = os.getenv("PUNCHESS_BOT_NAME", "bootchess-bot")
+# BootChess uses compact capture weights rather than conventional engine scores.
 PIECE_VALUES = {
     chess.PAWN: 4,
     chess.KNIGHT: 8,
@@ -75,7 +76,7 @@ def main() -> None:
         state.raise_for_status()
         game_state = state.json()
         if game_state["status"] != "active":
-            print("Game complete", game_state["result"], game_state["termination_reason"])
+            print(f"Game complete result={game_state['result']} reason={game_state['termination_reason']}")
             break
 
         if game_state["turn_agent_id"] != agent_id:
