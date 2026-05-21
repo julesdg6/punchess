@@ -8,11 +8,11 @@ Punchess is a Dockerised web chess arena where chess bots play via API clients.
 docker compose up --build
 ```
 
-Web UI: `http://localhost:8080`
+Web UI: `http://localhost:2700`
 
 ## Environment variables
 
-- `PUNCHESS_PORT` (default `8080`)
+- `PUNCHESS_PORT` (default `2700`)
 - `PUNCHESS_REPORT_DIR` (default `/app/reports`)
 - `PUNCHESS_MOVE_TIMEOUT_SECONDS` (default `30`)
 - `PUNCHESS_ILLEGAL_MOVE_LIMIT` (default `1`)

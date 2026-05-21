@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
-PORT = int(os.getenv("PUNCHESS_PORT", "8080"))
+PORT = int(os.getenv("PUNCHESS_PORT", "2700"))
 DEFAULT_REPORT_DIR = str(Path(__file__).resolve().parent.parent / "reports")
 REPORT_DIR = Path(os.getenv("PUNCHESS_REPORT_DIR", DEFAULT_REPORT_DIR))
 MOVE_TIMEOUT_SECONDS = int(os.getenv("PUNCHESS_MOVE_TIMEOUT_SECONDS", "30"))
