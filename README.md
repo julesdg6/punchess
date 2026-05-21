@@ -37,6 +37,7 @@ Reports are generated to `/reports/<game_id>/report.json`, `/report.md`, and `/g
 ## Python clients
 
 - `clients/python_template/` contains a random legal-move bot starter.
+- `clients/python_bootchess/` contains a very simple BootChess-inspired client that prefers captures and otherwise moves closer to the opposing king.
 - `clients/python_ollama/` contains an LLM-based bot that queries an Ollama model for moves.
 
 ### Ollama client
