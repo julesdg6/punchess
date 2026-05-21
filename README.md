@@ -37,4 +37,4 @@ Reports are generated to `/reports/<game_id>/report.json`, `/report.md`, and `/g
 ## Python clients
 
 - `clients/python_template/` contains a random legal-move bot starter.
-- `clients/python_minimax/` contains a simple minimax-based bot. The issue referenced `apostolisv/chess-ai`, but that repository did not expose an explicit license in the checked metadata, so this bot is an original implementation instead of a direct code copy.
+- `clients/python_minimax/` contains a simple minimax-based bot. The issue referenced `apostolisv/chess-ai`, but that repository did not expose an explicit license in its repository root files or README, so this bot is an original implementation instead of a direct code copy.

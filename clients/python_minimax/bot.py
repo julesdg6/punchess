@@ -8,7 +8,6 @@ import requests
 
 BASE_URL = os.getenv("PUNCHESS_URL", "http://localhost:8080")
 BOT_NAME = os.getenv("PUNCHESS_BOT_NAME", "minimax-bot")
-SEARCH_DEPTH = max(1, int(os.getenv("PUNCHESS_MINIMAX_DEPTH", "2")))
 CHECKMATE_SCORE = 100000
 PIECE_VALUES = {
     chess.PAWN: 100,
@@ -17,6 +16,14 @@ PIECE_VALUES = {
     chess.ROOK: 500,
     chess.QUEEN: 900,
 }
+
+
+def search_depth() -> int:
+    raw_depth = os.getenv("PUNCHESS_MINIMAX_DEPTH", "2")
+    try:
+        return max(1, int(raw_depth))
+    except ValueError as exc:
+        raise ValueError(f"PUNCHESS_MINIMAX_DEPTH must be an integer, got {raw_depth!r}") from exc
 
 
 def evaluate_board(board: chess.Board, root_turn: bool) -> int:
@@ -36,12 +43,11 @@ def minimax(board: chess.Board, depth: int, root_turn: bool, alpha: float, beta:
     if depth == 0 or board.is_game_over():
         return evaluate_board(board, root_turn), None
 
-    legal_moves = sorted(board.legal_moves, key=lambda move: move.uci())
     best_move = None
 
     if board.turn == root_turn:
         best_score = -math.inf
-        for move in legal_moves:
+        for move in board.legal_moves:
             board.push(move)
             score, _ = minimax(board, depth - 1, root_turn, alpha, beta)
             board.pop()
@@ -54,7 +60,7 @@ def minimax(board: chess.Board, depth: int, root_turn: bool, alpha: float, beta:
         return int(best_score), best_move
 
     best_score = math.inf
-    for move in legal_moves:
+    for move in board.legal_moves:
         board.push(move)
         score, _ = minimax(board, depth - 1, root_turn, alpha, beta)
         board.pop()
@@ -69,16 +75,17 @@ def minimax(board: chess.Board, depth: int, root_turn: bool, alpha: float, beta:
 
 def choose_move(game_state: Dict[str, Any]) -> str:
     board = chess.Board(game_state["fen"])
-    _, move = minimax(board, SEARCH_DEPTH, board.turn, -math.inf, math.inf)
+    _, move = minimax(board, search_depth(), board.turn, -math.inf, math.inf)
     if move is None:
         raise ValueError("no legal moves available")
     return move.uci()
 
 
 def main() -> None:
+    depth = search_depth()
     register = requests.post(
         f"{BASE_URL}/api/agents/register",
-        json={"name": BOT_NAME, "metadata": {"template": "python", "strategy": "minimax", "depth": SEARCH_DEPTH}},
+        json={"name": BOT_NAME, "metadata": {"template": "python", "strategy": "minimax", "depth": depth}},
     )
     register.raise_for_status()
     agent_id = register.json()["agent_id"]
@@ -111,7 +118,7 @@ def main() -> None:
         print(f"Playing {move}")
         resp = requests.post(
             f"{BASE_URL}/api/games/{game_id}/move",
-            json={"agent_id": agent_id, "move": move, "debug": {"source": "python_minimax", "depth": SEARCH_DEPTH}},
+            json={"agent_id": agent_id, "move": move, "debug": {"source": "python_minimax", "depth": depth}},
         )
         if resp.status_code >= 400:
             print("Move rejected", resp.text)
