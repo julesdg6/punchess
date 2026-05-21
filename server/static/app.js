@@ -72,7 +72,7 @@ async function refreshReports() {
 }
 
 let ws = null;
-watchBtn.onclick = async () => {
+async function watchGame() {
   const gameId = gameIdEl.value.trim();
   if (!gameId) return;
   if (ws) ws.close();
@@ -83,7 +83,9 @@ watchBtn.onclick = async () => {
   };
   const game = await fetch(`/api/games/${gameId}`).then(r => r.json());
   renderState(game);
-};
+}
+
+watchBtn.onclick = watchGame;
 
 startMatchBtn.onclick = async () => {
   startMatchBtn.disabled = true;
@@ -108,7 +110,7 @@ startMatchBtn.onclick = async () => {
     if (data.game_id) {
       gameIdEl.value = data.game_id;
       setLaunchStatus(`Started ${names}. Watching game ${data.game_id}.`);
-      await watchBtn.onclick();
+      await watchGame();
     } else {
       setLaunchStatus(
         data.auto_start

@@ -304,7 +304,7 @@ def normalize_bot_name(raw_name: Any, fallback: str) -> str:
 def launch_bundled_client(client_id: str, bot_name: str) -> int:
     client = BUNDLED_CLIENTS.get(client_id)
     if not client:
-        raise HTTPException(status_code=400, detail=f"unknown bundled client: {client_id}")
+        raise HTTPException(status_code=400, detail="unknown bundled client")
 
     script_path = REPO_ROOT / client["script"]
     env = os.environ.copy()
@@ -341,7 +341,11 @@ async def wait_for_launched_game(white_name: str, black_name: str, created_after
         for game in games.values():
             if game.created_at < created_after:
                 continue
-            if agents[game.white_id].name == white_name and agents[game.black_id].name == black_name:
+            white_agent = agents.get(game.white_id)
+            black_agent = agents.get(game.black_id)
+            if not white_agent or not black_agent:
+                continue
+            if white_agent.name == white_name and black_agent.name == black_name:
                 return game
         await asyncio.sleep(0.1)
     return None
