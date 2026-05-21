@@ -64,6 +64,24 @@ def test_illegal_move_forfeit_after_limit():
     assert report.status_code == 200
 
 
+def test_join_lobby_returns_existing_pairing_for_first_agent():
+    client = TestClient(app)
+    white = client.post("/api/agents/register", json={"name": "White"}).json()["agent_id"]
+    black = client.post("/api/agents/register", json={"name": "Black"}).json()["agent_id"]
+
+    first_join = client.post("/api/lobby/join", json={"agent_id": white}).json()
+    second_join = client.post("/api/lobby/join", json={"agent_id": black}).json()
+    repeated_first_join = client.post("/api/lobby/join", json={"agent_id": white}).json()
+
+    assert first_join["status"] == "queued"
+    assert second_join["status"] == "paired"
+    assert repeated_first_join == {
+        "status": "paired",
+        "game_id": second_join["game_id"],
+        "assigned_color": "white",
+    }
+
+
 def test_index_renders_pre_game_menu():
     client = TestClient(app)
 

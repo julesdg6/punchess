@@ -283,6 +283,13 @@ def bundled_clients_payload() -> List[Dict[str, str]]:
     return [BUNDLED_CLIENTS[client_id] for client_id in sorted(BUNDLED_CLIENTS)]
 
 
+def assigned_game_for_agent(agent_id: str) -> Optional[Game]:
+    for game in games.values():
+        if game.status == "active" and agent_id in {game.white_id, game.black_id}:
+            return game
+    return None
+
+
 def normalize_bot_name(raw_name: Any, fallback: str) -> str:
     if not isinstance(raw_name, str):
         return fallback
@@ -369,6 +376,10 @@ async def join_lobby(payload: Dict[str, Any]) -> Dict[str, Any]:
     agent_id = payload.get("agent_id")
     if agent_id not in agents:
         raise HTTPException(status_code=400, detail="unregistered client")
+    existing_game = assigned_game_for_agent(agent_id)
+    if existing_game:
+        assigned = "white" if existing_game.white_id == agent_id else "black"
+        return {"status": "paired", "game_id": existing_game.id, "assigned_color": assigned}
     if agent_id not in lobby:
         lobby.append(agent_id)
     game = await create_game_if_ready()
