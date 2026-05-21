@@ -34,6 +34,27 @@ Web UI: `http://localhost:2700`
 
 Reports are generated to `/reports/<game_id>/report.json`, `/report.md`, and `/game.pgn`.
 
-## Python bot template
+## Python clients
 
-See `clients/python_template/` for a random legal-move bot starter.
+- `clients/python_template/` contains a random legal-move bot starter.
+- `clients/python_ollama/` contains an LLM-based bot that queries an Ollama model for moves.
+
+### Ollama client
+
+The Ollama client uses the existing Punchess HTTP API and asks a locally running Ollama model to pick a legal move in UCI format.
+
+Environment variables:
+
+- `PUNCHESS_URL` (default `http://localhost:2700`)
+- `PUNCHESS_BOT_NAME` (default `ollama-bot`)
+- `PUNCHESS_OLLAMA_URL` (default `http://localhost:11434`)
+- `PUNCHESS_OLLAMA_MODEL` (default `llama3.2`)
+- `PUNCHESS_OLLAMA_TEMPERATURE` (default `0`)
+- `PUNCHESS_HTTP_TIMEOUT_SECONDS` (default `30`)
+- `PUNCHESS_POLL_INTERVAL_SECONDS` (default `0.5`)
+
+Example:
+
+```bash
+PUNCHESS_OLLAMA_MODEL=llama3.2 python clients/python_ollama/bot.py
+```
