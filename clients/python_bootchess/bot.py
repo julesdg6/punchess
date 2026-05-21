@@ -13,7 +13,6 @@ PIECE_VALUES = {
     chess.BISHOP: 12,
     chess.ROOK: 16,
     chess.QUEEN: 24,
-    chess.KING: 32,
 }
 
 
