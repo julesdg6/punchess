@@ -1,0 +1,14 @@
+services:
+  punchess:
+    build: .
+    ports:
+      - "${PUNCHESS_PORT:-8080}:8080"
+    environment:
+      PUNCHESS_PORT: ${PUNCHESS_PORT:-8080}
+      PUNCHESS_REPORT_DIR: /app/reports
+      PUNCHESS_MOVE_TIMEOUT_SECONDS: ${PUNCHESS_MOVE_TIMEOUT_SECONDS:-30}
+      PUNCHESS_ILLEGAL_MOVE_LIMIT: ${PUNCHESS_ILLEGAL_MOVE_LIMIT:-1}
+      PUNCHESS_DISCONNECT_GRACE_SECONDS: ${PUNCHESS_DISCONNECT_GRACE_SECONDS:-10}
+      PUNCHESS_AUTO_START: ${PUNCHESS_AUTO_START:-true}
+    volumes:
+      - ./server/reports:/app/reports
