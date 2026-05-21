@@ -1,6 +1,8 @@
 import asyncio
 import json
 import os
+import subprocess
+import sys
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -17,18 +19,35 @@ from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
 PORT = int(os.getenv("PUNCHESS_PORT", "2700"))
-DEFAULT_REPORT_DIR = str(Path(__file__).resolve().parent.parent / "reports")
+APP_DIR = Path(__file__).resolve().parent.parent
+REPO_ROOT = APP_DIR.parent
+DEFAULT_REPORT_DIR = str(APP_DIR / "reports")
 REPORT_DIR = Path(os.getenv("PUNCHESS_REPORT_DIR", DEFAULT_REPORT_DIR))
 MOVE_TIMEOUT_SECONDS = int(os.getenv("PUNCHESS_MOVE_TIMEOUT_SECONDS", "30"))
 ILLEGAL_MOVE_LIMIT = int(os.getenv("PUNCHESS_ILLEGAL_MOVE_LIMIT", "1"))
 DISCONNECT_GRACE_SECONDS = int(os.getenv("PUNCHESS_DISCONNECT_GRACE_SECONDS", "10"))
 AUTO_START = os.getenv("PUNCHESS_AUTO_START", "true").lower() == "true"
 
+BUNDLED_CLIENTS: Dict[str, Dict[str, str]] = {
+    "python_template": {
+        "id": "python_template",
+        "name": "Python random bot",
+        "description": "Random legal-move example client.",
+        "script": "clients/python_template/bot.py",
+    },
+    "python_minimax": {
+        "id": "python_minimax",
+        "name": "Python minimax bot",
+        "description": "Simple minimax client included with Punchess.",
+        "script": "clients/python_minimax/bot.py",
+    },
+}
+
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Punchess")
-app.mount("/static", StaticFiles(directory=str(Path(__file__).resolve().parent.parent / "static")), name="static")
-templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
+app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
+templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 
 
 @dataclass
@@ -37,6 +56,7 @@ class Agent:
     name: str
     metadata: Dict[str, Any]
     connected: bool = False
+    registered_at: float = field(default_factory=time.time)
 
 
 @dataclass
@@ -259,9 +279,74 @@ async def create_game_if_ready() -> Optional[Game]:
     return game
 
 
+def bundled_clients_payload() -> List[Dict[str, str]]:
+    return [BUNDLED_CLIENTS[client_id] for client_id in sorted(BUNDLED_CLIENTS)]
+
+
+def normalize_bot_name(raw_name: Any, fallback: str) -> str:
+    if not isinstance(raw_name, str):
+        return fallback
+    name = " ".join(raw_name.split())
+    if not name:
+        return fallback
+    if len(name) > 80:
+        raise HTTPException(status_code=400, detail="bot name must be 80 characters or fewer")
+    return name
+
+
+def launch_bundled_client(client_id: str, bot_name: str) -> int:
+    client = BUNDLED_CLIENTS.get(client_id)
+    if not client:
+        raise HTTPException(status_code=400, detail=f"unknown bundled client: {client_id}")
+
+    script_path = REPO_ROOT / client["script"]
+    env = os.environ.copy()
+    env["PUNCHESS_URL"] = f"http://127.0.0.1:{PORT}"
+    env["PUNCHESS_BOT_NAME"] = bot_name
+
+    try:
+        process = subprocess.Popen(
+            [sys.executable, str(script_path)],
+            cwd=str(REPO_ROOT),
+            env=env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail=f"failed to launch bundled client: {client_id}") from exc
+    return process.pid
+
+
+async def wait_for_agent_in_lobby(name: str, registered_after: float, timeout: float = 5.0) -> Optional[str]:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        for agent_id, agent in agents.items():
+            if agent.name == name and agent.registered_at >= registered_after and agent_id in lobby:
+                return agent_id
+        await asyncio.sleep(0.1)
+    return None
+
+
+async def wait_for_launched_game(white_name: str, black_name: str, created_after: float, timeout: float = 5.0) -> Optional[Game]:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        for game in games.values():
+            if game.created_at < created_after:
+                continue
+            if agents[game.white_id].name == white_name and agents[game.black_id].name == black_name:
+                return game
+        await asyncio.sleep(0.1)
+    return None
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "port": PORT})
+    return templates.TemplateResponse(
+        request,
+        "index.html",
+        {"port": PORT, "bundled_clients": bundled_clients_payload(), "auto_start": AUTO_START},
+    )
 
 
 @app.get("/health")
@@ -292,6 +377,34 @@ async def join_lobby(payload: Dict[str, Any]) -> Dict[str, Any]:
         assigned = "white" if game.white_id == agent_id else "black"
         return {"status": "paired", "game_id": game.id, "assigned_color": assigned}
     return {"status": "queued"}
+
+
+@app.post("/api/matches/launch")
+async def launch_match(payload: Dict[str, Any]) -> Dict[str, Any]:
+    white_client_id = payload.get("white_client")
+    black_client_id = payload.get("black_client")
+    if white_client_id not in BUNDLED_CLIENTS or black_client_id not in BUNDLED_CLIENTS:
+        raise HTTPException(status_code=400, detail="unknown bundled client")
+
+    white_name = normalize_bot_name(payload.get("white_name"), f"{BUNDLED_CLIENTS[white_client_id]['name']} (white)")
+    black_name = normalize_bot_name(payload.get("black_name"), f"{BUNDLED_CLIENTS[black_client_id]['name']} (black)")
+    launched_at = time.time()
+
+    white_pid = launch_bundled_client(white_client_id, white_name)
+    white_agent_id = await wait_for_agent_in_lobby(white_name, launched_at) if AUTO_START else None
+    black_pid = launch_bundled_client(black_client_id, black_name)
+    game = await wait_for_launched_game(white_name, black_name, launched_at) if AUTO_START and white_agent_id else None
+
+    return {
+        "status": "paired" if game else "launched",
+        "auto_start": AUTO_START,
+        "game_id": game.id if game else None,
+        "watch_url": f"/api/games/{game.id}" if game else None,
+        "clients": [
+            {"color": "white", "client_id": white_client_id, "name": white_name, "pid": white_pid},
+            {"color": "black", "client_id": black_client_id, "name": black_name, "pid": black_pid},
+        ],
+    }
 
 
 @app.get("/api/games/{game_id}")

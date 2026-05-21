@@ -7,11 +7,51 @@
 </head>
 <body>
   <h1>Punchess</h1>
-  <div id="info">Use a game ID to watch a live game.</div>
-  <div>
+  <div id="info">Launch a bundled match or enter a game ID to watch a live game.</div>
+
+  <section class="panel">
+    <h2>Pre-game menu</h2>
+    <div class="pregame-grid">
+      <label>
+        White client
+        <select id="whiteClient">
+          {% for client in bundled_clients %}
+          <option value="{{ client.id }}">{{ client.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        White name
+        <input id="whiteName" placeholder="optional display name" />
+      </label>
+      <label>
+        Black client
+        <select id="blackClient">
+          {% for client in bundled_clients %}
+          <option value="{{ client.id }}">{{ client.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Black name
+        <input id="blackName" placeholder="optional display name" />
+      </label>
+    </div>
+    <button id="startMatchBtn">Start bundled match</button>
+    <div id="launchStatus">
+      {% if auto_start %}
+      Launching white first reserves white, then the second bundled client joins as black.
+      {% else %}
+      Bundled clients will launch and join the lobby, but auto-start is currently disabled.
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Watch a live game</h2>
     <input id="gameId" placeholder="game id" />
     <button id="watchBtn">Watch</button>
-  </div>
+  </section>
 
   <div class="grid">
     <div>

@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional, Tuple
 import chess
 import requests
 
-BASE_URL = os.getenv("PUNCHESS_URL", "http://localhost:8080")
+BASE_URL = os.getenv("PUNCHESS_URL", "http://localhost:2700")
 BOT_NAME = os.getenv("PUNCHESS_BOT_NAME", "minimax-bot")
 CHECKMATE_SCORE = 100000
 PIECE_VALUES = {
