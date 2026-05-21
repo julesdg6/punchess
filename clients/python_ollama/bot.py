@@ -98,7 +98,7 @@ def main() -> None:
             state.raise_for_status()
             game_state = state.json()
             if game_state["status"] != "active":
-                print("Game complete", game_state["result"], game_state["termination_reason"])
+                print(f"Game complete: {game_state['result']} ({game_state['termination_reason']})")
                 break
 
             if game_state["turn_agent_id"] != agent_id:
