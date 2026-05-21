@@ -1,7 +1,7 @@
 import math
 import os
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Tuple
 
 import chess
 import requests
@@ -39,7 +39,7 @@ def evaluate_board(board: chess.Board, root_turn: bool) -> int:
     return score if root_turn == chess.WHITE else -score
 
 
-def minimax(board: chess.Board, depth: int, root_turn: bool, alpha: float, beta: float) -> tuple[int, chess.Move | None]:
+def minimax(board: chess.Board, depth: int, root_turn: bool, alpha: float, beta: float) -> Tuple[int, Optional[chess.Move]]:
     if depth == 0 or board.is_game_over():
         return evaluate_board(board, root_turn), None
 
