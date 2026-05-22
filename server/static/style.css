@@ -1,7 +1,12 @@
 body { font-family: Arial, sans-serif; margin: 1rem; }
+.panel { margin-bottom: 1rem; }
+.pregame-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem; }
+.pregame-grid label { display: flex; flex-direction: column; gap: 0.25rem; }
 .grid { display: grid; grid-template-columns: 420px 1fr; gap: 1rem; margin-top: 1rem; }
 #board { border-collapse: collapse; }
 #board td { width: 48px; height: 48px; text-align: center; font-size: 32px; }
 .light { background: #f0d9b5; }
 .dark { background: #b58863; }
 pre { background: #f5f5f5; padding: 0.5rem; white-space: pre-wrap; }
+#launchStatus { margin-top: 0.5rem; }
+.error { color: #b00020; }

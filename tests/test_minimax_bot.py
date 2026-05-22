@@ -1,6 +1,9 @@
+import importlib
+
 import chess
 import pytest
 
+from clients.python_minimax import bot as minimax_bot
 from clients.python_minimax.bot import choose_move, search_depth
 
 
@@ -34,3 +37,11 @@ def test_search_depth_clamps_non_positive_values(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setenv("PUNCHESS_MINIMAX_DEPTH", "0")
 
     assert search_depth() == 1
+
+
+def test_minimax_defaults_to_server_port(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.delenv("PUNCHESS_URL", raising=False)
+
+    reloaded = importlib.reload(minimax_bot)
+
+    assert reloaded.BASE_URL == "http://localhost:2700"

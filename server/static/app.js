@@ -2,6 +2,10 @@ const boardEl = document.getElementById('board');
 const statusEl = document.getElementById('status');
 const movesEl = document.getElementById('moves');
 const reportsEl = document.getElementById('reports');
+const gameIdEl = document.getElementById('gameId');
+const launchStatusEl = document.getElementById('launchStatus');
+const startMatchBtn = document.getElementById('startMatchBtn');
+const watchBtn = document.getElementById('watchBtn');
 
 const pieces = {
   p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚',
@@ -52,6 +56,11 @@ function renderState(state) {
   movesEl.textContent = state.moves.join(' ');
 }
 
+function setLaunchStatus(message, isError = false) {
+  launchStatusEl.textContent = message;
+  launchStatusEl.className = isError ? 'error' : '';
+}
+
 async function refreshReports() {
   const data = await fetch('/api/reports').then(r => r.json());
   reportsEl.innerHTML = '';
@@ -63,8 +72,8 @@ async function refreshReports() {
 }
 
 let ws = null;
-document.getElementById('watchBtn').onclick = async () => {
-  const gameId = document.getElementById('gameId').value.trim();
+async function watchGame() {
+  const gameId = gameIdEl.value.trim();
   if (!gameId) return;
   if (ws) ws.close();
   ws = new WebSocket(`ws://${location.host}/ws/viewer/${gameId}`);
@@ -74,6 +83,46 @@ document.getElementById('watchBtn').onclick = async () => {
   };
   const game = await fetch(`/api/games/${gameId}`).then(r => r.json());
   renderState(game);
+}
+
+watchBtn.onclick = watchGame;
+
+startMatchBtn.onclick = async () => {
+  startMatchBtn.disabled = true;
+  setLaunchStatus('Launching bundled clients...');
+  try {
+    const payload = {
+      white_client: document.getElementById('whiteClient').value,
+      white_name: document.getElementById('whiteName').value,
+      black_client: document.getElementById('blackClient').value,
+      black_name: document.getElementById('blackName').value
+    };
+    const response = await fetch('/api/matches/launch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.detail || 'Failed to launch bundled clients');
+    }
+    const names = data.clients.map((client) => `${client.color}: ${client.name}`).join(' · ');
+    if (data.game_id) {
+      gameIdEl.value = data.game_id;
+      setLaunchStatus(`Started ${names}. Watching game ${data.game_id}.`);
+      await watchGame();
+    } else {
+      setLaunchStatus(
+        data.auto_start
+          ? `Launched ${names}. Waiting for the bots to finish pairing.`
+          : `Launched ${names}. They joined the lobby, but auto-start is disabled.`
+      );
+    }
+  } catch (error) {
+    setLaunchStatus(error.message || 'Failed to launch bundled clients', true);
+  } finally {
+    startMatchBtn.disabled = false;
+  }
 };
 
 refreshReports();
