@@ -37,8 +37,8 @@ BUNDLED_CLIENTS: Dict[str, Dict[str, str]] = {
     },
     "python_chess": {
         "id": "python_chess",
-        "name": "Python chess bot",
-        "description": "python-chess legal-move client starter.",
+        "name": "Python chess random bot",
+        "description": "python-chess legal-move client (random strategy).",
         "script": "clients/python_template/bot.py",
     },
     "python_ollama": {
