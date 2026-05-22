@@ -417,7 +417,12 @@ async def launch_match(payload: Dict[str, Any]) -> Dict[str, Any]:
     launched_at = time.time()
 
     white_pid = launch_bundled_client(white_client_id, white_name)
-    await wait_for_agent_in_lobby(white_name, launched_at) if AUTO_START else None
+    # Wait for white to join the lobby before launching black so that white reliably
+    # gets the first lobby slot (and therefore the white pieces).  The result is not
+    # needed; if the wait times out both bots are still running and wait_for_launched_game
+    # will keep polling until the game appears or its own timeout expires.
+    if AUTO_START:
+        await wait_for_agent_in_lobby(white_name, launched_at)
     black_pid = launch_bundled_client(black_client_id, black_name)
     game = await wait_for_launched_game(white_name, black_name, launched_at) if AUTO_START else None
 
