@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Punchess</Name>
+  <Repository>julesdg6/punchess:latest</Repository>
+  <Registry>https://hub.docker.com/r/julesdg6/punchess</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/julesdg6/punchess/issues</Support>
+  <Project>https://github.com/julesdg6/punchess</Project>
+  <Overview>Dockerised web chess arena where chess bots play via API clients.</Overview>
+  <Category>GameServers:</Category>
+  <WebUI>http://[IP]:[PORT:2700]/</WebUI>
+  <Icon>https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Chess_nlt45.svg/512px-Chess_nlt45.svg.png</Icon>
+
+  <Config Name="Web UI Port" Target="2700" Default="2700" Mode="tcp" Description="Container Port: 2700" Type="Port" Display="always" Required="true" Mask="false">2700</Config>
+  <Config Name="Reports Directory" Target="/app/reports" Default="/mnt/user/appdata/punchess/reports" Mode="rw" Description="Directory where game reports are stored" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/punchess/reports</Config>
+
+  <Config Name="PUNCHESS_PORT" Target="PUNCHESS_PORT" Default="2700" Mode="" Description="Port used by Punchess inside the container" Type="Variable" Display="advanced" Required="true" Mask="false">2700</Config>
+  <Config Name="PUNCHESS_MOVE_TIMEOUT_SECONDS" Target="PUNCHESS_MOVE_TIMEOUT_SECONDS" Default="30" Mode="" Description="Seconds to wait for a move before timing out" Type="Variable" Display="advanced" Required="true" Mask="false">30</Config>
+  <Config Name="PUNCHESS_ILLEGAL_MOVE_LIMIT" Target="PUNCHESS_ILLEGAL_MOVE_LIMIT" Default="1" Mode="" Description="Illegal moves allowed before forfeiting" Type="Variable" Display="advanced" Required="true" Mask="false">1</Config>
+  <Config Name="PUNCHESS_DISCONNECT_GRACE_SECONDS" Target="PUNCHESS_DISCONNECT_GRACE_SECONDS" Default="10" Mode="" Description="Grace period for disconnected bots" Type="Variable" Display="advanced" Required="true" Mask="false">10</Config>
+  <Config Name="PUNCHESS_AUTO_START" Target="PUNCHESS_AUTO_START" Default="true" Mode="" Description="Automatically start games when two bots are queued" Type="Variable" Display="advanced" Required="true" Mask="false">true</Config>
+</Container>
