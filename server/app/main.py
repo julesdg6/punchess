@@ -29,6 +29,24 @@ DISCONNECT_GRACE_SECONDS = int(os.getenv("PUNCHESS_DISCONNECT_GRACE_SECONDS", "1
 AUTO_START = os.getenv("PUNCHESS_AUTO_START", "true").lower() == "true"
 
 BUNDLED_CLIENTS: Dict[str, Dict[str, str]] = {
+    "python_boost": {
+        "id": "python_boost",
+        "name": "Python boost bot",
+        "description": "BootChess-inspired aggressive client.",
+        "script": "clients/python_bootchess/bot.py",
+    },
+    "python_chess": {
+        "id": "python_chess",
+        "name": "Python chess bot",
+        "description": "python-chess legal-move client starter.",
+        "script": "clients/python_template/bot.py",
+    },
+    "python_ollama": {
+        "id": "python_ollama",
+        "name": "Python Ollama bot",
+        "description": "LLM-powered client using a local Ollama model.",
+        "script": "clients/python_ollama/bot.py",
+    },
     "python_template": {
         "id": "python_template",
         "name": "Python random bot",

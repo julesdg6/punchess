@@ -39,6 +39,7 @@ Reports are generated to `/reports/<game_id>/report.json`, `/report.md`, and `/g
 
 ## Python clients
 
+- Bundled client IDs exposed by the pre-game menu and `POST /api/matches/launch`: `python_chess`, `python_minimax`, `python_boost`, `python_ollama` (plus `python_template` for backwards compatibility).
 - `clients/python_template/` contains a random legal-move bot starter.
 - `clients/python_bootchess/` contains a very simple BootChess-inspired client that prefers captures and otherwise moves closer to the opposing king.
 - `clients/python_ollama/` contains an LLM-based bot that queries an Ollama model for moves.
@@ -115,4 +116,3 @@ The starter client in `clients/python_template/bot.py` is the reference implemen
 
 - Template file: `deploy/unraid/punchess.xml`
 - Includes a chess icon and WebUI mapping (`http://[IP]:[PORT:2700]/`) for Unraid's UI launch button.
-
