@@ -39,7 +39,8 @@ Reports are generated to `/reports/<game_id>/report.json`, `/report.md`, and `/g
 
 ## Python clients
 
-- Bundled client IDs exposed by the pre-game menu and `POST /api/matches/launch`: `python_chess`, `python_minimax`, `python_boost`, `python_ollama` (plus `python_template` for backwards compatibility).
+- Bundled client IDs exposed by the pre-game menu and `POST /api/matches/launch`: `python_chess`, `python_minimax`, `python_bootchess`, `python_ollama` (plus `python_template` for backwards compatibility).
+- `clients/python_chess/` contains a python-chess-based random legal-move bot.
 - `clients/python_template/` contains a random legal-move bot starter.
 - `clients/python_bootchess/` contains a very simple BootChess-inspired client that prefers captures and otherwise moves closer to the opposing king.
 - `clients/python_ollama/` contains an LLM-based bot that queries an Ollama model for moves.

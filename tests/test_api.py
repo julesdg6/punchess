@@ -90,7 +90,7 @@ def test_index_renders_pre_game_menu():
     assert response.status_code == 200
     assert 'Pre-game menu' in response.text
     assert 'Start bundled match' in response.text
-    assert 'value="python_boost"' in response.text
+    assert 'value="python_bootchess"' in response.text
     assert 'value="python_chess"' in response.text
     assert 'value="python_ollama"' in response.text
     assert 'value="python_template"' in response.text
@@ -169,12 +169,12 @@ def test_launch_match_supports_new_bundled_client_ids(monkeypatch: pytest.Monkey
 
     response = client.post(
         "/api/matches/launch",
-        json={"white_client": "python_chess", "black_client": "python_boost"},
+        json={"white_client": "python_chess", "black_client": "python_bootchess"},
     )
 
     assert response.status_code == 200
     assert response.json()["game_id"] == "game-456"
     assert [entry["command"][1] for entry in launched] == [
-        str(main.REPO_ROOT / "clients/python_template/bot.py"),
+        str(main.REPO_ROOT / "clients/python_chess/bot.py"),
         str(main.REPO_ROOT / "clients/python_bootchess/bot.py"),
     ]
