@@ -149,7 +149,6 @@ def test_launch_match_rejects_unknown_client():
     assert response.json()["detail"] == "unknown bundled client"
 
 
-<<<<<<< HEAD
 def test_launch_match_supports_new_bundled_client_ids(monkeypatch: pytest.MonkeyPatch):
     client = TestClient(app)
     launched = []
@@ -179,7 +178,8 @@ def test_launch_match_supports_new_bundled_client_ids(monkeypatch: pytest.Monkey
         str(main.REPO_ROOT / "clients/python_chess/bot.py"),
         str(main.REPO_ROOT / "clients/python_bootchess/bot.py"),
     ]
-=======
+
+
 def test_list_games_returns_active_and_completed_games():
     client = TestClient(app)
     a = client.post("/api/agents/register", json={"name": "ListA"}).json()["agent_id"]
@@ -197,4 +197,3 @@ def test_list_games_returns_active_and_completed_games():
     assert entry["status"] == "active"
     assert entry["white"] == "ListA"
     assert entry["black"] == "ListB"
->>>>>>> origin/main
