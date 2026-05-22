@@ -21,6 +21,13 @@ From the home page you can use the **Pre-game menu** to launch the bundled clien
 - `PUNCHESS_DISCONNECT_GRACE_SECONDS` (default `10`)
 - `PUNCHESS_AUTO_START` (default `true`)
 
+Bot client environment variables (applies to all bundled Python bots):
+
+- `PUNCHESS_URL` (default `http://localhost:2700`) — server address the bot connects to
+- `PUNCHESS_BOT_NAME` — display name used when registering the agent
+- `PUNCHESS_RETRY_DELAY_SECONDS` (default `2`) — seconds to wait between retries when the server is temporarily unreachable
+- `PUNCHESS_MAX_RETRIES` (default `10`) — maximum number of registration retries before the bot exits with an error
+
 ## API
 
 - `GET /health`

@@ -111,12 +111,20 @@ startMatchBtn.onclick = async () => {
       gameIdEl.value = data.game_id;
       setLaunchStatus(`Started ${names}. Watching game ${data.game_id}.`);
       await watchGame();
+    } else if (data.auto_start) {
+      const whiteName = data.clients.find((c) => c.color === 'white')?.name;
+      const blackName = data.clients.find((c) => c.color === 'black')?.name;
+      setLaunchStatus(`Launched ${names}. Waiting for the bots to finish pairing...`);
+      const gameId = await pollForGame(whiteName, blackName);
+      if (gameId) {
+        gameIdEl.value = gameId;
+        setLaunchStatus(`Started ${names}. Watching game ${gameId}.`);
+        await watchGame();
+      } else {
+        setLaunchStatus(`Launched ${names}. Bots are still pairing – check the server logs.`, true);
+      }
     } else {
-      setLaunchStatus(
-        data.auto_start
-          ? `Launched ${names}. Waiting for the bots to finish pairing.`
-          : `Launched ${names}. They joined the lobby, but auto-start is disabled.`
-      );
+      setLaunchStatus(`Launched ${names}. They joined the lobby, but auto-start is disabled.`);
     }
   } catch (error) {
     setLaunchStatus(error.message || 'Failed to launch bundled clients', true);
@@ -124,6 +132,22 @@ startMatchBtn.onclick = async () => {
     startMatchBtn.disabled = false;
   }
 };
+
+async function pollForGame(whiteName, blackName, timeoutMs = 60000, intervalMs = 1000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    try {
+      const resp = await fetch('/api/games');
+      const data = await resp.json();
+      const match = (data.games || []).find(
+        (g) => g.white === whiteName && g.black === blackName
+      );
+      if (match) return match.game_id;
+    } catch (_) { /* ignore transient errors */ }
+  }
+  return null;
+}
 
 refreshReports();
 setInterval(refreshReports, 5000);
