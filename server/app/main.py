@@ -293,6 +293,9 @@ async def create_game_if_ready() -> Optional[Game]:
     game.illegal_counts = {white_id: 0, black_id: 0}
     game.material_balance.append(material_delta(game.board))
     games[game.id] = game
+    white_name = agents[white_id].name
+    black_name = agents[black_id].name
+    print(f"[punchess] game {game.id} started: {white_name!r} (white) vs {black_name!r} (black)")
     await broadcast_game(game)
     return game
 
@@ -340,20 +343,23 @@ def launch_bundled_client(client_id: str, bot_name: str) -> int:
         )
     except OSError as exc:
         raise HTTPException(status_code=500, detail=f"failed to launch bundled client: {client_id}") from exc
+    print(f"[punchess] launched {client_id!r} as {bot_name!r} (pid={process.pid})")
     return process.pid
 
 
-async def wait_for_agent_in_lobby(name: str, registered_after: float, timeout: float = 5.0) -> Optional[str]:
+async def wait_for_agent_in_lobby(name: str, registered_after: float, timeout: float = 15.0) -> Optional[str]:
     deadline = time.time() + timeout
     while time.time() < deadline:
         for agent_id, agent in agents.items():
             if agent.name == name and agent.registered_at >= registered_after and agent_id in lobby:
+                print(f"[punchess] agent {name!r} ({agent_id}) is in lobby")
                 return agent_id
         await asyncio.sleep(0.1)
+    print(f"[punchess] timed out waiting for agent {name!r} to join lobby")
     return None
 
 
-async def wait_for_launched_game(white_name: str, black_name: str, created_after: float, timeout: float = 5.0) -> Optional[Game]:
+async def wait_for_launched_game(white_name: str, black_name: str, created_after: float, timeout: float = 15.0) -> Optional[Game]:
     deadline = time.time() + timeout
     while time.time() < deadline:
         for game in games.values():
@@ -364,8 +370,10 @@ async def wait_for_launched_game(white_name: str, black_name: str, created_after
             if not white_agent or not black_agent:
                 continue
             if white_agent.name == white_name and black_agent.name == black_name:
+                print(f"[punchess] game {game.id} created for {white_name!r} vs {black_name!r}")
                 return game
         await asyncio.sleep(0.1)
+    print(f"[punchess] timed out waiting for game {white_name!r} vs {black_name!r}")
     return None
 
 
@@ -390,6 +398,7 @@ async def register_agent(payload: Dict[str, Any]) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail="name is required")
     agent_id = str(uuid.uuid4())
     agents[agent_id] = Agent(id=agent_id, name=name, metadata=payload.get("metadata", {}))
+    print(f"[punchess] agent registered: {name!r} ({agent_id})")
     return {"agent_id": agent_id, "name": name}
 
 
@@ -403,7 +412,9 @@ async def join_lobby(payload: Dict[str, Any]) -> Dict[str, Any]:
         assigned = "white" if existing_game.white_id == agent_id else "black"
         return {"status": "paired", "game_id": existing_game.id, "assigned_color": assigned}
     if agent_id not in lobby:
+        name = agents[agent_id].name
         lobby.append(agent_id)
+        print(f"[punchess] agent {name!r} ({agent_id}) joined lobby (lobby size: {len(lobby)})")
     game = await create_game_if_ready()
     assigned = None
     if game:
@@ -424,9 +435,14 @@ async def launch_match(payload: Dict[str, Any]) -> Dict[str, Any]:
     launched_at = time.time()
 
     white_pid = launch_bundled_client(white_client_id, white_name)
-    white_agent_id = await wait_for_agent_in_lobby(white_name, launched_at) if AUTO_START else None
+    # Wait for white to join the lobby before launching black so that white reliably
+    # gets the first lobby slot (and therefore the white pieces).  The result is not
+    # needed; if the wait times out both bots are still running and wait_for_launched_game
+    # will keep polling until the game appears or its own timeout expires.
+    if AUTO_START:
+        await wait_for_agent_in_lobby(white_name, launched_at)
     black_pid = launch_bundled_client(black_client_id, black_name)
-    game = await wait_for_launched_game(white_name, black_name, launched_at) if AUTO_START and white_agent_id else None
+    game = await wait_for_launched_game(white_name, black_name, launched_at) if AUTO_START else None
 
     return {
         "status": "paired" if game else "launched",
@@ -560,6 +576,23 @@ async def game_report(game_id: str):
     if not report_path.exists():
         raise HTTPException(status_code=404, detail="report not found")
     return JSONResponse(json.loads(report_path.read_text(encoding="utf-8")))
+
+
+@app.get("/api/games")
+async def list_games() -> Dict[str, Any]:
+    result = []
+    for game in games.values():
+        white = agents.get(game.white_id)
+        black = agents.get(game.black_id)
+        result.append(
+            {
+                "game_id": game.id,
+                "status": game.status,
+                "white": white.name if white else None,
+                "black": black.name if black else None,
+            }
+        )
+    return {"games": result}
 
 
 @app.get("/api/reports")
